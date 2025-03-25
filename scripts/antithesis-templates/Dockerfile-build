@@ -33,9 +33,14 @@ RUN apt update && apt install -y \
 RUN wget https://storage.googleapis.com/antithesis-aptos/libvoidstar.so -O /usr/lib/libvoidstar.so
 
 
-# Clone Aptos repository
-RUN git clone --single-branch -b $APTOS_BRANCH --depth=1 https://github.com/aptos-labs/aptos-core.git
+# Clone Aptos repository # https://github.com/aptos-labs/aptos-core.git
+RUN touch /foobar1
+RUN git clone --single-branch -b $APTOS_BRANCH --depth=1 https://github.com/JRMurr/aptos-core.git
+
+
 WORKDIR /aptos-core
+RUN git log --oneline -n 5
+
 RUN CHANNEL=$(grep -oP 'channel\s*=\s*"\K[^"]+' rust-toolchain.toml 2>/dev/null || echo "") && \
     if [ -n "$CHANNEL" ] && [ "$(printf '%s\n' "1.75.0" "$CHANNEL" | sort -V | head -n1)" = "$CHANNEL" ]; then \
         sed -i 's/channel = "[^"]*"/channel = "1.81.0"/' rust-toolchain.toml; \
@@ -47,7 +52,7 @@ COPY ./scripts/antithesis-templates/antithesis-cpu.patch antithesis-cpu.patch
 
 # Build the aptos-node binary
 RUN python3 -m venv .venv
-RUN /bin/bash -c "source .venv/bin/activate && scripts/dev_setup.sh -b -t"
+RUN /bin/bash -c "source .venv/bin/activate && scripts/dev_setup.sh -b -t -k"
 
 ENV PATH="/root/.cargo/bin:$PATH"
 RUN ./gen.sh

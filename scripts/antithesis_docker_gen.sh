@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Exit immediately if a command exits with a non-zero status
 set -e
@@ -75,6 +75,8 @@ if [[ $APTOS_BRANCH =~ ^aptos-node-v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
 else
     echo "Using default 'latest' tag for docker images"
 fi
+
+set -x
 
 # Build the Aptos framework, node, genesis and all the configs and identities
 echo "Building Aptos framework, node and genesis, it may take a while..."
