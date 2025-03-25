@@ -8,7 +8,7 @@ use aptos_types::{
 };
 use move_binary_format::errors::PartialVMResult;
 use move_core_types::{language_storage::StructTag, value::MoveTypeLayout};
-use std::{collections::BTreeMap, sync::Arc};
+use std::{collections::HashMap as BTreeMap, sync::Arc};
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum AbstractResourceWriteOp {

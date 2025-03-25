@@ -22,7 +22,7 @@ use move_core_types::{
     vm_status::{StatusCode, VMStatus},
 };
 use move_vm_types::delayed_values::delayed_field_id::DelayedFieldID;
-use std::collections::BTreeMap;
+use std::collections::HashMap as BTreeMap;
 
 /// Output produced by the VM after executing a transaction.
 ///

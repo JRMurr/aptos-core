@@ -12,7 +12,7 @@ use move_core_types::{
     vm_status::StatusCode,
 };
 use move_vm_runtime::ModuleStorage;
-use std::collections::BTreeMap;
+use std::collections::HashMap as BTreeMap;
 
 /// A write with a published module, also containing the information about its address and name.
 #[derive(Debug, Clone, Eq, PartialEq)]
