@@ -15,7 +15,7 @@ use aptos_types::{
 };
 use claims::{assert_err, assert_matches, assert_ok};
 use move_core_types::vm_status::{AbortLocation, VMStatus};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 fn assert_eq_outputs(vm_output: &VMOutput, txn_output: TransactionOutput) {
     let vm_output_writes = &vm_output
@@ -96,8 +96,7 @@ fn test_ok_output_equality_with_deltas() {
             vec![],
         );
 
-    let expected_aggregator_write_set =
-        BTreeMap::from([mock_modify("2", 2), mock_modify("3", 400)]);
+    let expected_aggregator_write_set = HashMap::from([mock_modify("2", 2), mock_modify("3", 400)]);
     assert_eq!(
         materialized_vm_output.resource_write_set(),
         vm_output.resource_write_set()

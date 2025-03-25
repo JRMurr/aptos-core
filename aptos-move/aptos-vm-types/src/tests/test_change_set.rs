@@ -39,7 +39,7 @@ use move_core_types::{
     vm_status::StatusCode,
 };
 use move_vm_types::delayed_values::delayed_field_id::DelayedFieldID;
-use std::{collections::BTreeMap, sync::Arc};
+use std::{collections::HashMap as BTreeMap, sync::Arc};
 
 /// Testcases:
 /// ```text
@@ -170,13 +170,13 @@ fn test_successful_squash() {
         &expected_resource_write_set!(descriptor)
     );
 
-    let expected_aggregator_write_set = BTreeMap::from([
+    let expected_aggregator_write_set = HashMap::from([
         mock_create("18a", 136),
         mock_modify("19a", 138),
         mock_modify("22a", 122),
         mock_delete("23a"),
     ]);
-    let expected_aggregator_delta_set = BTreeMap::from([
+    let expected_aggregator_delta_set = HashMap::from([
         mock_add("15a", 15),
         mock_add("16a", 116),
         mock_add("17a", 134),

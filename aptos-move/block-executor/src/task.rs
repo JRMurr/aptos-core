@@ -23,7 +23,7 @@ use aptos_vm_types::{
 use move_core_types::{value::MoveTypeLayout, vm_status::StatusCode};
 use move_vm_types::delayed_values::delayed_field_id::DelayedFieldID;
 use std::{
-    collections::{BTreeMap, HashSet},
+    collections::{HashMap as BTreeMap, HashSet},
     fmt::Debug,
     sync::Arc,
 };
@@ -112,7 +112,7 @@ pub trait TransactionOutput: Send + Sync + Debug {
 
     fn aggregator_v1_write_set(
         &self,
-    ) -> BTreeMap<<Self::Txn as Transaction>::Key, <Self::Txn as Transaction>::Value>;
+    ) -> HashMap<<Self::Txn as Transaction>::Key, <Self::Txn as Transaction>::Value>;
 
     /// Get the aggregator V1 deltas of a transaction from its output.
     fn aggregator_v1_delta_set(&self) -> Vec<(<Self::Txn as Transaction>::Key, DeltaOp)>;

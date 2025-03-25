@@ -27,7 +27,7 @@ use move_core_types::{
     value::MoveTypeLayout,
 };
 use move_vm_types::delayed_values::delayed_field_id::DelayedFieldID;
-use std::{collections::BTreeMap, sync::Arc};
+use std::{collections::HashMap as BTreeMap, sync::Arc};
 
 macro_rules! as_state_key {
     ($k:ident) => {

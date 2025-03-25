@@ -45,7 +45,7 @@ use move_core_types::{
 use move_vm_types::delayed_values::delayed_field_id::DelayedFieldID;
 use once_cell::sync::{Lazy, OnceCell};
 use std::{
-    collections::{BTreeMap, HashSet},
+    collections::{HashMap, HashSet},
     marker::PhantomData,
     sync::Arc,
 };
@@ -123,7 +123,7 @@ impl BlockExecutorTransactionOutput for AptosTransactionOutput {
         StateKey,
         WriteOp,
         ResourceGroupSize,
-        BTreeMap<StructTag, (WriteOp, Option<Arc<MoveTypeLayout>>)>,
+        HashMap<StructTag, (WriteOp, Option<Arc<MoveTypeLayout>>)>,
     )> {
         self.vm_output
             .lock()
@@ -205,7 +205,7 @@ impl BlockExecutorTransactionOutput for AptosTransactionOutput {
     }
 
     /// Should never be called after incorporating materialized output, as that consumes vm_output.
-    fn aggregator_v1_write_set(&self) -> BTreeMap<StateKey, WriteOp> {
+    fn aggregator_v1_write_set(&self) -> HashMap<StateKey, WriteOp> {
         self.vm_output
             .lock()
             .as_ref()

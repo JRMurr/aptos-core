@@ -38,8 +38,8 @@ use move_vm_types::delayed_values::delayed_field_id::DelayedFieldID;
 use rand::Rng;
 use std::{
     collections::{
-        btree_map::Entry::{Occupied, Vacant},
-        BTreeMap,
+        hash_map::Entry::{Occupied, Vacant},
+        HashMap,
     },
     hash::Hash,
     sync::Arc,
@@ -79,16 +79,16 @@ pub fn randomly_check_layout_matches(
 /// VM. For storage backends, use `ChangeSet`.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct VMChangeSet {
-    resource_write_set: BTreeMap<StateKey, AbstractResourceWriteOp>,
+    resource_write_set: HashMap<StateKey, AbstractResourceWriteOp>,
     events: Vec<(ContractEvent, Option<MoveTypeLayout>)>,
 
     // Changes separated out from the writes, for better concurrency,
     // materialized back into resources when transaction output is computed.
-    delayed_field_change_set: BTreeMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
+    delayed_field_change_set: HashMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
 
     // TODO[agg_v1](cleanup) deprecate aggregator_v1 fields.
-    aggregator_v1_write_set: BTreeMap<StateKey, WriteOp>,
-    aggregator_v1_delta_set: BTreeMap<StateKey, DeltaOp>,
+    aggregator_v1_write_set: HashMap<StateKey, WriteOp>,
+    aggregator_v1_delta_set: HashMap<StateKey, DeltaOp>,
 }
 
 macro_rules! squash_writes_pair {
@@ -108,20 +108,20 @@ macro_rules! squash_writes_pair {
 impl VMChangeSet {
     pub fn empty() -> Self {
         Self {
-            resource_write_set: BTreeMap::new(),
+            resource_write_set: HashMap::new(),
             events: vec![],
-            delayed_field_change_set: BTreeMap::new(),
-            aggregator_v1_write_set: BTreeMap::new(),
-            aggregator_v1_delta_set: BTreeMap::new(),
+            delayed_field_change_set: HashMap::new(),
+            aggregator_v1_write_set: HashMap::new(),
+            aggregator_v1_delta_set: HashMap::new(),
         }
     }
 
     pub fn new(
-        resource_write_set: BTreeMap<StateKey, AbstractResourceWriteOp>,
+        resource_write_set: HashMap<StateKey, AbstractResourceWriteOp>,
         events: Vec<(ContractEvent, Option<MoveTypeLayout>)>,
-        delayed_field_change_set: BTreeMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
-        aggregator_v1_write_set: BTreeMap<StateKey, WriteOp>,
-        aggregator_v1_delta_set: BTreeMap<StateKey, DeltaOp>,
+        delayed_field_change_set: HashMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
+        aggregator_v1_write_set: HashMap<StateKey, WriteOp>,
+        aggregator_v1_delta_set: HashMap<StateKey, DeltaOp>,
     ) -> Self {
         Self {
             resource_write_set,
@@ -134,16 +134,16 @@ impl VMChangeSet {
 
     // TODO[agg_v2](cleanup) see if we can remove in favor of `new`.
     pub fn new_expanded(
-        resource_write_set: BTreeMap<StateKey, (WriteOp, Option<Arc<MoveTypeLayout>>)>,
-        resource_group_write_set: BTreeMap<StateKey, GroupWrite>,
-        aggregator_v1_write_set: BTreeMap<StateKey, WriteOp>,
-        aggregator_v1_delta_set: BTreeMap<StateKey, DeltaOp>,
-        delayed_field_change_set: BTreeMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
-        reads_needing_delayed_field_exchange: BTreeMap<
+        resource_write_set: HashMap<StateKey, (WriteOp, Option<Arc<MoveTypeLayout>>)>,
+        resource_group_write_set: HashMap<StateKey, GroupWrite>,
+        aggregator_v1_write_set: HashMap<StateKey, WriteOp>,
+        aggregator_v1_delta_set: HashMap<StateKey, DeltaOp>,
+        delayed_field_change_set: HashMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
+        reads_needing_delayed_field_exchange: HashMap<
             StateKey,
             (StateValueMetadata, u64, Arc<MoveTypeLayout>),
         >,
-        group_reads_needing_delayed_field_exchange: BTreeMap<StateKey, (StateValueMetadata, u64)>,
+        group_reads_needing_delayed_field_exchange: HashMap<StateKey, (StateValueMetadata, u64)>,
         events: Vec<(ContractEvent, Option<MoveTypeLayout>)>,
     ) -> PartialVMResult<Self> {
         Ok(Self::new(
@@ -187,8 +187,8 @@ impl VMChangeSet {
                         ))
                     },
                 ))
-                .try_fold::<_, _, PartialVMResult<BTreeMap<_, _>>>(
-                    BTreeMap::new(),
+                .try_fold::<_, _, PartialVMResult<HashMap<_, _>>>(
+                    HashMap::new(),
                     |mut acc, element| {
                         let (key, value) = element?;
                         if acc.insert(key, value).is_some() {
@@ -281,7 +281,7 @@ impl VMChangeSet {
             )
     }
 
-    pub fn resource_write_set(&self) -> &BTreeMap<StateKey, AbstractResourceWriteOp> {
+    pub fn resource_write_set(&self) -> &HashMap<StateKey, AbstractResourceWriteOp> {
         &self.resource_write_set
     }
 
@@ -336,25 +336,25 @@ impl VMChangeSet {
 
     pub(crate) fn drain_delayed_field_change_set(
         &mut self,
-    ) -> BTreeMap<DelayedFieldID, DelayedChange<DelayedFieldID>> {
+    ) -> HashMap<DelayedFieldID, DelayedChange<DelayedFieldID>> {
         std::mem::take(&mut self.delayed_field_change_set)
     }
 
-    pub(crate) fn drain_aggregator_v1_delta_set(&mut self) -> BTreeMap<StateKey, DeltaOp> {
+    pub(crate) fn drain_aggregator_v1_delta_set(&mut self) -> HashMap<StateKey, DeltaOp> {
         std::mem::take(&mut self.aggregator_v1_delta_set)
     }
 
-    pub fn aggregator_v1_write_set(&self) -> &BTreeMap<StateKey, WriteOp> {
+    pub fn aggregator_v1_write_set(&self) -> &HashMap<StateKey, WriteOp> {
         &self.aggregator_v1_write_set
     }
 
-    pub fn aggregator_v1_delta_set(&self) -> &BTreeMap<StateKey, DeltaOp> {
+    pub fn aggregator_v1_delta_set(&self) -> &HashMap<StateKey, DeltaOp> {
         &self.aggregator_v1_delta_set
     }
 
     pub fn delayed_field_change_set(
         &self,
-    ) -> &BTreeMap<DelayedFieldID, DelayedChange<DelayedFieldID>> {
+    ) -> &HashMap<DelayedFieldID, DelayedChange<DelayedFieldID>> {
         &self.delayed_field_change_set
     }
 
@@ -392,17 +392,17 @@ impl VMChangeSet {
         let materialized_aggregator_delta_set = aggregator_v1_delta_set
             .into_iter()
             .map(into_write)
-            .collect::<VMResult<BTreeMap<StateKey, WriteOp>>>()?;
+            .collect::<VMResult<HashMap<StateKey, WriteOp>>>()?;
         self.aggregator_v1_write_set
             .extend(materialized_aggregator_delta_set);
         Ok(())
     }
 
     fn squash_additional_aggregator_v1_changes(
-        aggregator_v1_write_set: &mut BTreeMap<StateKey, WriteOp>,
-        aggregator_v1_delta_set: &mut BTreeMap<StateKey, DeltaOp>,
-        additional_aggregator_v1_write_set: BTreeMap<StateKey, WriteOp>,
-        additional_aggregator_v1_delta_set: BTreeMap<StateKey, DeltaOp>,
+        aggregator_v1_write_set: &mut HashMap<StateKey, WriteOp>,
+        aggregator_v1_delta_set: &mut HashMap<StateKey, DeltaOp>,
+        additional_aggregator_v1_write_set: HashMap<StateKey, WriteOp>,
+        additional_aggregator_v1_delta_set: HashMap<StateKey, DeltaOp>,
     ) -> PartialVMResult<()> {
         use WriteOp::*;
 
@@ -486,8 +486,8 @@ impl VMChangeSet {
     }
 
     fn squash_additional_delayed_field_changes(
-        change_set: &mut BTreeMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
-        additional_change_set: BTreeMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
+        change_set: &mut HashMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
+        additional_change_set: HashMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
     ) -> PartialVMResult<()> {
         let merged_changes = additional_change_set
             .into_iter()
@@ -524,8 +524,8 @@ impl VMChangeSet {
     fn squash_additional_resource_write_ops<
         K: Hash + Eq + PartialEq + Ord + Clone + std::fmt::Debug,
     >(
-        write_set: &mut BTreeMap<K, (WriteOp, Option<Arc<MoveTypeLayout>>)>,
-        additional_write_set: BTreeMap<K, (WriteOp, Option<Arc<MoveTypeLayout>>)>,
+        write_set: &mut HashMap<K, (WriteOp, Option<Arc<MoveTypeLayout>>)>,
+        additional_write_set: HashMap<K, (WriteOp, Option<Arc<MoveTypeLayout>>)>,
     ) -> Result<(), PanicError> {
         for (key, additional_entry) in additional_write_set.into_iter() {
             match write_set.entry(key.clone()) {
@@ -554,8 +554,8 @@ impl VMChangeSet {
 
     // pub(crate) only for testing
     pub(crate) fn squash_additional_resource_writes(
-        write_set: &mut BTreeMap<StateKey, AbstractResourceWriteOp>,
-        additional_write_set: BTreeMap<StateKey, AbstractResourceWriteOp>,
+        write_set: &mut HashMap<StateKey, AbstractResourceWriteOp>,
+        additional_write_set: HashMap<StateKey, AbstractResourceWriteOp>,
     ) -> Result<(), PanicError> {
         use AbstractResourceWriteOp::*;
         for (key, additional_entry) in additional_write_set.into_iter() {
@@ -795,8 +795,8 @@ pub fn create_vm_change_set_with_module_write_set_when_delayed_field_optimizatio
 
     // There should be no aggregator writes if we have a change set from
     // storage.
-    let mut resource_write_set = BTreeMap::new();
-    let mut module_write_ops = BTreeMap::new();
+    let mut resource_write_set = HashMap::new();
+    let mut module_write_ops = HashMap::new();
 
     for (state_key, write_op) in write_set {
         if let StateKeyInner::AccessPath(ap) = state_key.inner() {
@@ -819,9 +819,9 @@ pub fn create_vm_change_set_with_module_write_set_when_delayed_field_optimizatio
     let change_set = VMChangeSet::new(
         resource_write_set,
         events,
-        BTreeMap::new(),
-        BTreeMap::new(),
-        BTreeMap::new(),
+        HashMap::new(),
+        HashMap::new(),
+        HashMap::new(),
     );
 
     // The flag if modules have been published to a special address is irrelevant because

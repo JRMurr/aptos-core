@@ -44,7 +44,7 @@ use once_cell::sync::OnceCell;
 use proptest::{arbitrary::Arbitrary, collection::vec, prelude::*, proptest, sample::Index};
 use proptest_derive::Arbitrary;
 use std::{
-    collections::{hash_map::DefaultHasher, BTreeMap, BTreeSet, HashMap, HashSet},
+    collections::{hash_map::DefaultHasher, HashMap, HashSet},
     fmt::Debug,
     hash::{Hash, Hasher},
     marker::PhantomData,
@@ -1089,7 +1089,7 @@ where
             .collect()
     }
 
-    fn module_write_set(&self) -> BTreeMap<K, ModuleWrite<ValueType>> {
+    fn module_write_set(&self) -> HashMap<K, ModuleWrite<ValueType>> {
         self.writes
             .iter()
             .filter(|(k, _)| k.is_module_path())
@@ -1103,17 +1103,17 @@ where
 
     // Aggregator v1 writes are included in resource_write_set for tests (writes are produced
     // for all keys including ones for v1_aggregators without distinguishing).
-    fn aggregator_v1_write_set(&self) -> BTreeMap<K, ValueType> {
-        BTreeMap::new()
+    fn aggregator_v1_write_set(&self) -> HashMap<K, ValueType> {
+        HashMap::new()
     }
 
     fn aggregator_v1_delta_set(&self) -> Vec<(K, DeltaOp)> {
         self.deltas.clone()
     }
 
-    fn delayed_field_change_set(&self) -> BTreeMap<DelayedFieldID, DelayedChange<DelayedFieldID>> {
+    fn delayed_field_change_set(&self) -> HashMap<DelayedFieldID, DelayedChange<DelayedFieldID>> {
         // TODO[agg_v2](tests): add aggregators V2 to the proptest?
-        BTreeMap::new()
+        HashMap::new()
     }
 
     fn reads_needing_delayed_field_exchange(
