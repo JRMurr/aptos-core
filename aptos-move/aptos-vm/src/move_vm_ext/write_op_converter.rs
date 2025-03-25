@@ -25,7 +25,7 @@ use move_core_types::{
     value::MoveTypeLayout,
     vm_status::StatusCode,
 };
-use std::{collections::BTreeMap, sync::Arc};
+use std::{collections::{BTreeMap, HashMap}, sync::Arc};
 
 pub(crate) struct WriteOpConverter<'r> {
     remote: &'r dyn AptosMoveResolver,
@@ -81,8 +81,8 @@ impl<'r> WriteOpConverter<'r> {
         &self,
         module_storage: &impl AptosModuleStorage,
         verified_module_bundle: impl Iterator<Item = (ModuleId, Bytes)>,
-    ) -> PartialVMResult<BTreeMap<StateKey, ModuleWrite<WriteOp>>> {
-        let mut writes = BTreeMap::new();
+    ) -> PartialVMResult<HashMap<StateKey, ModuleWrite<WriteOp>>> {
+        let mut writes = HashMap::new();
         for (module_id, bytes) in verified_module_bundle {
             let addr = module_id.address();
             let name = module_id.name();
@@ -166,7 +166,7 @@ impl<'r> WriteOpConverter<'r> {
         let pre_group_size = self.remote.resource_group_size(state_key)?;
         check_size_and_existence_match(&pre_group_size, state_value_metadata.is_some(), state_key)?;
 
-        let mut inner_ops = BTreeMap::new();
+        let mut inner_ops = HashMap::new();
         let mut post_group_size = pre_group_size;
 
         for (tag, current_op) in group_changes {

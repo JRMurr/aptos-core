@@ -195,7 +195,7 @@ impl BlockExecutorTransactionOutput for AptosTransactionOutput {
     }
 
     /// Should never be called after incorporating materialized output, as that consumes vm_output.
-    fn module_write_set(&self) -> BTreeMap<StateKey, ModuleWrite<WriteOp>> {
+    fn module_write_set(&self) -> HashMap<StateKey, ModuleWrite<WriteOp>> {
         self.vm_output
             .lock()
             .as_ref()
@@ -227,7 +227,7 @@ impl BlockExecutorTransactionOutput for AptosTransactionOutput {
     }
 
     /// Should never be called after incorporating materialized output, as that consumes vm_output.
-    fn delayed_field_change_set(&self) -> BTreeMap<DelayedFieldID, DelayedChange<DelayedFieldID>> {
+    fn delayed_field_change_set(&self) -> HashMap<DelayedFieldID, DelayedChange<DelayedFieldID>> {
         self.vm_output
             .lock()
             .as_ref()

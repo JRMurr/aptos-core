@@ -16,7 +16,7 @@ use move_core_types::value::MoveTypeLayout;
 use move_vm_types::delayed_values::delayed_field_id::DelayedFieldID;
 use std::{
     cell::RefCell,
-    collections::{BTreeMap, HashSet},
+    collections::{BTreeMap, HashMap, HashSet},
     sync::Arc,
 };
 
@@ -36,7 +36,7 @@ pub enum AggregatorChangeV1 {
 /// user, e.g. VM session.
 pub struct AggregatorChangeSet {
     pub aggregator_v1_changes: BTreeMap<StateKey, AggregatorChangeV1>,
-    pub delayed_field_changes: BTreeMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
+    pub delayed_field_changes: HashMap<DelayedFieldID, DelayedChange<DelayedFieldID>>,
     pub reads_needing_exchange: BTreeMap<StateKey, (StateValueMetadata, u64, Arc<MoveTypeLayout>)>,
     pub group_reads_needing_exchange: BTreeMap<StateKey, (StateValueMetadata, u64)>,
 }
@@ -124,7 +124,7 @@ impl<'a> NativeAggregatorContext<'a> {
             .collect::<HashSet<_>>();
         Ok(AggregatorChangeSet {
             aggregator_v1_changes,
-            delayed_field_changes,
+            delayed_field_changes: delayed_field_changes.into_iter().collect(),
             // is_empty check covers both whether delayed fields are enabled or not, as well as whether there
             // are any changes that would require computing reads needing exchange.
             // TODO[agg_v2](optimize) we only later compute the write set, so cannot pass the correct skip values here.

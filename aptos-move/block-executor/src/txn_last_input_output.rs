@@ -27,7 +27,7 @@ use move_core_types::{language_storage::ModuleId, value::MoveTypeLayout};
 use move_vm_runtime::{Module, RuntimeEnvironment};
 use move_vm_types::delayed_values::delayed_field_id::DelayedFieldID;
 use std::{
-    collections::{BTreeMap, HashSet},
+    collections::{HashMap as BTreeMap, HashSet},
     fmt::Debug,
     iter::{empty, Iterator},
     sync::Arc,

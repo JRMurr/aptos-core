@@ -43,7 +43,7 @@ use move_vm_runtime::{
 };
 use move_vm_types::{value_serde::ValueSerDeContext, values::Value};
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, HashMap},
     ops::{Deref, DerefMut},
     sync::Arc,
 };
@@ -389,14 +389,14 @@ impl<'r, 'l> SessionExt<'r, 'l> {
         aggregator_change_set: AggregatorChangeSet,
         legacy_resource_creation_as_modification: bool,
     ) -> PartialVMResult<(VMChangeSet, ModuleWriteSet)> {
-        let mut resource_write_set = BTreeMap::new();
-        let mut resource_group_write_set = BTreeMap::new();
+        let mut resource_write_set = HashMap::new();
+        let mut resource_group_write_set = HashMap::new();
 
         let mut has_modules_published_to_special_address = false;
-        let mut module_writes = BTreeMap::new();
+        let mut module_writes = HashMap::new();
 
-        let mut aggregator_v1_write_set = BTreeMap::new();
-        let mut aggregator_v1_delta_set = BTreeMap::new();
+        let mut aggregator_v1_write_set = HashMap::new();
+        let mut aggregator_v1_delta_set = HashMap::new();
 
         for (addr, account_changeset) in change_set.into_inner() {
             let (modules, resources) = account_changeset.into_inner();
@@ -501,7 +501,7 @@ pub fn convert_modules_into_write_ops(
     features: &Features,
     module_storage: &impl AptosModuleStorage,
     verified_module_bundle: VerifiedModuleBundle<ModuleId, Bytes>,
-) -> PartialVMResult<BTreeMap<StateKey, ModuleWrite<WriteOp>>> {
+) -> PartialVMResult<HashMap<StateKey, ModuleWrite<WriteOp>>> {
     let woc = WriteOpConverter::new(resolver, features.is_storage_slot_metadata_enabled());
     woc.convert_modules_into_write_ops(module_storage, verified_module_bundle.into_iter())
 }

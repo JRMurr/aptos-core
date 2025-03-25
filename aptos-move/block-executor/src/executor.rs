@@ -63,7 +63,7 @@ use num_cpus;
 use rayon::ThreadPool;
 use std::{
     cell::RefCell,
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{HashMap, HashSet},
     marker::{PhantomData, Sync},
     sync::{
         atomic::{AtomicBool, AtomicU32, Ordering},
@@ -757,7 +757,7 @@ where
 
     fn publish_module_writes(
         txn_idx: TxnIndex,
-        module_write_set: BTreeMap<T::Key, ModuleWrite<T::Value>>,
+        module_write_set: HashMap<T::Key, ModuleWrite<T::Value>>,
         global_module_cache: &GlobalModuleCache<
             ModuleId,
             CompiledModule,
@@ -1490,7 +1490,7 @@ where
                         // previously failed in bcs serialization for preparing final transaction outputs.
                         // TODO: remove this fallback when txn errors can be created from block executor.
 
-                        let finalize = |group_key| -> (BTreeMap<_, _>, ResourceGroupSize) {
+                        let finalize = |group_key| -> (HashMap<_, _>, ResourceGroupSize) {
                             let (group, size) = unsync_map.finalize_group(&group_key);
 
                             (

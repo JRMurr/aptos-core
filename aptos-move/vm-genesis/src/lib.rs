@@ -68,7 +68,7 @@ use move_vm_types::gas::UnmeteredGasMeter;
 use once_cell::sync::Lazy;
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 // The seed is arbitrarily picked to produce a consistent key. XXX make this more formal?
 const GENESIS_SEED: [u8; 32] = [42; 32];
@@ -897,7 +897,7 @@ fn code_to_writes_for_loader_v2_publishing(
     genesis_state_view: &GenesisStateView,
     addr: AccountAddress,
     code: Vec<Bytes>,
-) -> VMResult<BTreeMap<StateKey, ModuleWrite<WriteOp>>> {
+) -> VMResult<HashMap<StateKey, ModuleWrite<WriteOp>>> {
     let module_storage =
         genesis_state_view.as_aptos_code_storage(genesis_runtime_environment.clone());
     let resolver = genesis_state_view.as_move_resolver();
@@ -928,7 +928,7 @@ fn publish_framework_with_loader_v2(
     let mut state_view = GenesisStateView::new();
 
     // First, publish modules.
-    let mut writes = BTreeMap::new();
+    let mut writes = HashMap::new();
     for pack in &framework.packages {
         let modules = pack.sorted_code_and_modules();
 

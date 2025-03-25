@@ -39,7 +39,7 @@ impl GenesisStateView {
 
     pub(crate) fn add_module_write_ops(
         &mut self,
-        module_write_ops: BTreeMap<StateKey, ModuleWrite<WriteOp>>,
+        module_write_ops: HashMap<StateKey, ModuleWrite<WriteOp>>,
     ) {
         for (state_key, write) in module_write_ops {
             assert!(state_key.is_module_path());
